@@ -1,8 +1,3 @@
-## 📸 Preview
-
-![Dashboard](./assets/dashboard.png)
-![Cofres](./assets/cofres.png)
-
 # LairaBudget 💸
 
 LairaBudget is a personal finance dashboard designed to help users manage their money in a simple and visual way.
