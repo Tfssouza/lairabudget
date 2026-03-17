@@ -1,0 +1,3631 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="manifest" href="manifest.webmanifest">
+
+<title>LairaBudget</title>
+<!-- PWA Apple -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LairaBudget">
+
+<!-- Ícone para iPhone -->
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+
+<!-- Cor da barra -->
+<meta name="theme-color" content="#061018">
+
+</head>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#061018">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LairaBudget">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#061018;
+      --bg-2:#0A1420;
+      --sidebar:#08111A;
+      --surface:#0F1724;
+      --surface-2:#131D2B;
+      --surface-3:#182334;
+
+      --text:#F8FAFC;
+      --muted:#94A3B8;
+
+      --primary:#22C55E;
+      --primary-2:#0EA5E9;
+
+      --danger:#EF4444;
+      --warning:#F59E0B;
+      --success:#22C55E;
+
+      --border:rgba(255,255,255,.06);
+      --shadow:0 20px 50px rgba(0,0,0,.35);
+
+      --radius:20px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;
+    }
+
+    body{
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,.10), transparent 25%),
+        radial-gradient(circle at top right, rgba(14,165,233,.08), transparent 20%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:260px 1fr;
+      min-height:100vh;
+    }
+
+    .sidebar{
+      background:rgba(8,17,26,.92);
+      border-right:1px solid var(--border);
+      padding:24px 18px;
+      position:sticky;
+      top:0;
+      height:100vh;
+      backdrop-filter:blur(14px);
+      z-index:5;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:28px;
+      padding:6px 10px;
+    }
+
+    .brand-badge{
+      width:40px;
+      height:40px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:white;
+      font-size:20px;
+      font-weight:900;
+      box-shadow:0 10px 25px rgba(34,197,94,.22);
+    }
+
+    .brand-text h1{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:-0.03em;
+    }
+
+    .brand-text p{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:2px;
+    }
+
+    .menu-label{
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:800;
+      margin:22px 10px 10px;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .nav-btn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      background:transparent;
+      color:var(--muted);
+      border:1px solid transparent;
+      border-radius:14px;
+      padding:14px 14px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+      text-align:left;
+    }
+
+    .nav-btn:hover{
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+    }
+
+    .nav-btn.active{
+      background:linear-gradient(135deg, rgba(34,197,94,.16), rgba(14,165,233,.14));
+      color:#fff;
+      border-color:rgba(34,197,94,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .nav-icon{
+      width:18px;
+      text-align:center;
+      font-size:15px;
+    }
+
+    .content{
+      padding:26px;
+      position:relative;
+      z-index:1;
+      transition:background .25s ease;
+    }
+
+    body:has(#overviewView.active) .content{
+      background:
+        radial-gradient(circle at 16% 0%, rgba(49,208,198,.05), transparent 18%),
+        linear-gradient(180deg, #060d16 0%, #09121d 100%);
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:2;
+    }
+
+    .topbar-left h2{
+      font-size:30px;
+      letter-spacing:-0.03em;
+      font-weight:900;
+    }
+
+    .topbar-left p{
+      color:var(--muted);
+      margin-top:6px;
+      font-size:14px;
+    }
+
+    .topbar-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .month-switcher{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:8px;
+    }
+
+    .month-btn{
+      background:var(--surface-2);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .month-label{
+      min-width:160px;
+      text-align:center;
+      font-size:14px;
+      font-weight:800;
+      color:var(--text);
+      padding:0 8px;
+    }
+
+    .today-badge{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:12px 16px;
+      border-radius:16px;
+      font-weight:700;
+      font-size:14px;
+    }
+
+    body:has(#overviewView.active) .topbar-left h2{
+      color:#f8fbff;
+    }
+
+    body:has(#overviewView.active) .topbar-left p{
+      color:#8b9caf;
+    }
+
+    body:has(#overviewView.active) .month-switcher,
+    body:has(#overviewView.active) .today-badge{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      box-shadow:0 10px 28px rgba(0,0,0,.16);
+      color:#f8fbff;
+    }
+
+    body:has(#overviewView.active) .month-btn{
+      background:#101b28;
+      color:#f8fbff;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    body:has(#overviewView.active) .month-label{
+      color:#f8fbff;
+    }
+
+    .view{
+      display:none;
+      animation:fadeIn .18s ease;
+    }
+
+    .view.active{
+      display:block;
+    }
+
+    @keyframes fadeIn{
+      from{ opacity:0; transform:translateY(4px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
+
+    .four-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:18px;
+      margin-bottom:22px;
+    }
+
+    .five-grid{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0,1fr));
+      gap:18px;
+      margin-bottom:22px;
+    }
+
+    .section-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:22px;
+      margin-bottom:22px;
+    }
+
+    .three-grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:22px;
+      margin-bottom:22px;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:22px;
+      margin-bottom:22px;
+    }
+
+    .hero-main{
+      min-height:340px;
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+      border-radius:30px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 22px 55px rgba(0,0,0,.30);
+      background:
+        radial-gradient(circle at 80% 10%, rgba(49,208,198,.08), transparent 40%),
+        radial-gradient(circle at 10% 90%, rgba(14,165,233,.06), transparent 45%),
+        linear-gradient(160deg,#0b131c,#111c28);
+    }
+
+    .hero-main::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      pointer-events:none;
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:2;
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .hero-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .hero-kicker{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      color:#7c8da1;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .hero-title{
+      font-size:34px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      max-width:560px;
+      line-height:1.05;
+      color:#f8fbff;
+    }
+
+    .hero-balance-tag{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:14px 16px;
+      min-width:170px;
+      text-align:right;
+      box-shadow:none;
+    }
+
+    .hero-balance-tag strong{
+      display:block;
+      font-size:12px;
+      color:#7c8da1;
+      margin-bottom:6px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .hero-balance-tag span{
+      font-size:22px;
+      font-weight:900;
+      color:#ffffff;
+    }
+
+    .hero-big-card{
+      max-width:560px;
+      background:
+        radial-gradient(circle at top left, rgba(49,208,198,.18), transparent 55%),
+        linear-gradient(135deg,#0f1b26,#132231);
+      color:#fff;
+      border-radius:26px;
+      padding:24px;
+      box-shadow:0 18px 45px rgba(0,0,0,.28);
+      border:1px solid rgba(49,208,198,.18);
+    }
+
+    .hero-big-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:800;
+      opacity:.95;
+      margin-bottom:14px;
+      color:#bafbf2;
+    }
+
+    .hero-big-value{
+      font-size:44px;
+      font-weight:900;
+      letter-spacing:-.05em;
+      line-height:1;
+      margin-bottom:16px;
+      color:#ffffff;
+    }
+
+    .hero-mini-stats{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .hero-mini-stat{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:12px 14px;
+      min-width:140px;
+    }
+
+    .hero-mini-stat strong{
+      display:block;
+      font-size:12px;
+      margin-bottom:6px;
+      color:#b8c7d8;
+    }
+
+    .hero-mini-stat span{
+      font-size:18px;
+      font-weight:900;
+      color:#ffffff;
+    }
+
+    .hero-sub{
+      display:none;
+    }
+
+    .hero-calendar-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      max-width:620px;
+    }
+
+    .hero-calendar-card{
+      background:linear-gradient(160deg,#0e1620,#121c28);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 12px 26px rgba(0,0,0,.18);
+    }
+
+    .hero-calendar-card.dim{
+      opacity:.92;
+    }
+
+    .hero-calendar-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .hero-calendar-top strong{
+      font-size:18px;
+      font-weight:900;
+      color:#f8fbff;
+    }
+
+    .hero-calendar-top span{
+      font-size:12px;
+      color:#7c8da1;
+    }
+
+    .hero-calendar-badge{
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:13px;
+      background:rgba(255,255,255,.05);
+      color:#d8e1eb;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:none;
+    }
+
+    .hero-days{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:8px;
+    }
+
+    .hero-day{
+      min-height:34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#7c8da1;
+      font-size:12px;
+      font-weight:700;
+      padding:8px 0;
+      border-radius:12px;
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.03);
+    }
+
+    .hero-day.empty{
+      background:transparent;
+      opacity:.25;
+      border-color:transparent;
+    }
+
+    .hero-day.marked{
+      background:linear-gradient(135deg, #1fb8b2, #31d0c6);
+      color:#041018;
+      font-weight:900;
+      box-shadow:none;
+    }
+
+    .hero-side{
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+      gap:18px;
+    }
+
+    .hero-side-card{
+      background:linear-gradient(160deg,#0e1621,#121c29);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:0 16px 34px rgba(0,0,0,.22);
+    }
+
+    .hero-side-card h3{
+      font-size:12px;
+      color:#7c8da1;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:10px;
+    }
+
+    .hero-side-card .main-number{
+      font-size:36px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      margin-bottom:8px;
+      color:#ffffff;
+    }
+
+    .hero-side-card .helper{
+      font-size:13px;
+      color:#8b9caf;
+      line-height:1.45;
+    }
+
+    .hero-month-bar{
+      height:12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      overflow:hidden;
+      margin-top:14px;
+    }
+
+    .hero-month-fill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg, #1fb8b2, #31d0c6);
+      box-shadow:none;
+    }
+
+    .hero-stat-stack{
+      display:grid;
+      gap:14px;
+    }
+
+    .hero-stat-line{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      font-size:14px;
+      color:#8b9caf;
+      font-weight:700;
+    }
+
+    .hero-stat-line strong{
+      color:#ffffff;
+      font-size:15px;
+    }
+
+    #overviewView .summary-item{
+      background:linear-gradient(160deg,#0f1824,#131e2c);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      padding:20px;
+      box-shadow:0 14px 30px rgba(0,0,0,.20);
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+    }
+
+    #overviewView .summary-item strong{
+      color:#8b9caf;
+    }
+
+    #overviewView .summary-value{
+      color:#ffffff;
+      font-size:24px;
+      font-weight:900;
+      letter-spacing:-0.03em;
+    }
+
+    #overviewView .summary-sub{
+      color:#8b9caf;
+      margin-top:8px;
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .panel{
+      background:linear-gradient(145deg, rgba(15,23,36,.96), rgba(19,29,43,.98));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+
+    .panel-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .panel-title h2{
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:-0.02em;
+    }
+
+    .panel-title p{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+
+    .chart-box{
+      height:320px;
+    }
+
+    .small-chart-box{
+      height:260px;
+    }
+
+    .forecast-box{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:14px;
+      margin-top:10px;
+    }
+
+    .forecast-item,
+    .planning-item,
+    .summary-item,
+    .daily-history-item,
+    .month-info-box,
+    .trip-item{
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+    }
+
+    .forecast-item strong,
+    .planning-item strong,
+    .summary-item strong,
+    .daily-history-item strong,
+    .month-info-box strong,
+    .trip-item strong{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .forecast-value,
+    .planning-value,
+    .summary-value,
+    .daily-history-value,
+    .month-info-value{
+      font-size:24px;
+      font-weight:900;
+      letter-spacing:-0.03em;
+    }
+
+    .forecast-sub,
+    .planning-sub,
+    .summary-sub,
+    .daily-history-sub,
+    .month-info-sub,
+    .trip-sub{
+      margin-top:8px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .forecast-status,
+    .planning-alert,
+    .event-warning-box{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:16px;
+      font-size:14px;
+      font-weight:700;
+      line-height:1.45;
+    }
+
+    .forecast-status.safe,
+    .planning-alert.safe,
+    .event-warning-box.safe{
+      background:rgba(34,197,94,.10);
+      color:#8CF5B1;
+      border:1px solid rgba(34,197,94,.22);
+    }
+
+    .forecast-status.warn,
+    .planning-alert.warn,
+    .event-warning-box.warn{
+      background:rgba(245,158,11,.10);
+      color:#F8C56B;
+      border:1px solid rgba(245,158,11,.24);
+    }
+
+    .forecast-status.danger,
+    .planning-alert.danger,
+    .event-warning-box.danger{
+      background:rgba(239,68,68,.10);
+      color:#FF8A8A;
+      border:1px solid rgba(239,68,68,.24);
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .input-group{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .input-group label{
+      font-size:13px;
+      font-weight:700;
+      color:var(--muted);
+    }
+
+    .input-group input,
+    .input-group select{
+      width:100%;
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      border-radius:14px;
+      padding:14px 14px;
+      font-size:14px;
+      outline:none;
+      color:var(--text);
+      transition:.2s ease;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus{
+      border-color:rgba(34,197,94,.35);
+      box-shadow:0 0 0 4px rgba(34,197,94,.08);
+    }
+
+    .field-error{
+      display:none;
+      font-size:12px;
+      color:#FF8A8A;
+      font-weight:700;
+      margin-top:-2px;
+    }
+
+    .field-error.show{
+      display:block;
+    }
+
+    .btn-row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    button{
+      border:none;
+      cursor:pointer;
+      border-radius:14px;
+      padding:13px 18px;
+      font-size:14px;
+      font-weight:800;
+      transition:.2s ease;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--primary), var(--primary-2));
+      color:#fff;
+      box-shadow:0 10px 25px rgba(34,197,94,.20);
+    }
+
+    .btn-secondary{
+      background:var(--surface-2);
+      color:var(--text);
+      border:1px solid var(--border);
+    }
+
+    .btn-danger{
+      background:rgba(239,68,68,.10);
+      color:#FF8A8A;
+      border:1px solid rgba(239,68,68,.25);
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+    }
+
+    .goals-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:4px;
+    }
+
+    .goal-item{
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .goal-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .goal-name{
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .goal-values{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .goal-bar{
+      height:12px;
+      width:100%;
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .goal-fill{
+      height:100%;
+      border-radius:999px;
+      transition:.3s ease;
+      background:linear-gradient(90deg, var(--primary), var(--primary-2));
+      width:0%;
+    }
+
+    .goal-foot{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-top:10px;
+      flex-wrap:wrap;
+      font-size:13px;
+    }
+
+    .goal-status{
+      font-weight:800;
+      color:#9EEBB8;
+    }
+
+    .goal-remaining{
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .planning-grid{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+
+    .planning-item.warn{
+      border-color:rgba(245,158,11,.28);
+      background:rgba(245,158,11,.08);
+    }
+
+    .planning-item.danger{
+      border-color:rgba(239,68,68,.28);
+      background:rgba(239,68,68,.08);
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:18px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:900px;
+      background:transparent;
+    }
+
+    th, td{
+      padding:14px 16px;
+      text-align:left;
+      font-size:14px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      vertical-align:middle;
+    }
+
+    th{
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .tag.account{
+      background:rgba(14,165,233,.12);
+      color:#7DD3FC;
+    }
+
+    .tag.meal{
+      background:rgba(245,158,11,.12);
+      color:#F8C56B;
+    }
+
+    .tag.save{
+      background:rgba(34,197,94,.12);
+      color:#8CF5B1;
+    }
+
+    .delete-btn{
+      background:rgba(239,68,68,.10);
+      color:#FF8A8A;
+      border:1px solid rgba(239,68,68,.22);
+      padding:8px 12px;
+      border-radius:10px;
+      font-weight:800;
+    }
+
+    .select-btn{
+      background:rgba(14,165,233,.10);
+      color:#7DD3FC;
+      border:1px solid rgba(14,165,233,.22);
+      padding:8px 12px;
+      border-radius:10px;
+      font-weight:800;
+    }
+
+    .small-note{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:10px;
+      line-height:1.5;
+    }
+
+    .cofre-tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .cofre-tab{
+      background:var(--surface-2);
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:13px;
+    }
+
+    .cofre-tab.active{
+      color:#fff;
+      background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(14,165,233,.16));
+      border-color:rgba(34,197,94,.18);
+    }
+
+    .progress-cell{
+      min-width:180px;
+    }
+
+    .mini-progress{
+      width:100%;
+      height:10px;
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:8px;
+    }
+
+    .mini-progress-fill{
+      height:100%;
+      border-radius:999px;
+      transition:.3s ease;
+    }
+
+    .progress-safe{
+      background:#22C55E;
+    }
+
+    .progress-warn{
+      background:#F59E0B;
+    }
+
+    .progress-danger{
+      background:#EF4444;
+    }
+
+    .budget-status{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .budget-status.safe{
+      background:rgba(34,197,94,.12);
+      color:#8CF5B1;
+      border:1px solid rgba(34,197,94,.24);
+    }
+
+    .budget-status.warn{
+      background:rgba(245,158,11,.12);
+      color:#F8C56B;
+      border:1px solid rgba(245,158,11,.24);
+    }
+
+    .budget-status.danger{
+      background:rgba(239,68,68,.12);
+      color:#FF8A8A;
+      border:1px solid rgba(239,68,68,.24);
+    }
+
+    .toast-wrap{
+      position:fixed;
+      top:18px;
+      right:18px;
+      z-index:12000;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      pointer-events:none;
+    }
+
+    .toast{
+      min-width:280px;
+      max-width:360px;
+      padding:14px 16px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      box-shadow:0 20px 45px rgba(0,0,0,.35);
+      font-size:14px;
+      font-weight:800;
+      line-height:1.45;
+      animation:toastIn .22s ease;
+      pointer-events:auto;
+    }
+
+    .toast.success{
+      background:rgba(34,197,94,.14);
+      color:#8CF5B1;
+      border-color:rgba(34,197,94,.24);
+    }
+
+    .toast.error{
+      background:rgba(239,68,68,.14);
+      color:#FF8A8A;
+      border-color:rgba(239,68,68,.24);
+    }
+
+    .toast.warning{
+      background:rgba(245,158,11,.14);
+      color:#F8C56B;
+      border-color:rgba(245,158,11,.24);
+    }
+
+    @keyframes toastIn{
+      from{ opacity:0; transform:translateY(-8px) scale(.98); }
+      to{ opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    .registo-hero{
+      margin-bottom:22px;
+      padding:26px;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at 80% 10%, rgba(49,208,198,.07), transparent 35%),
+        linear-gradient(160deg,#0c141e,#111c28);
+      box-shadow:0 22px 55px rgba(0,0,0,.26);
+    }
+
+    .registo-hero-top{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+
+    .registo-kicker{
+      font-size:12px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#9cefe4;
+      margin-bottom:8px;
+    }
+
+    .registo-title{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1.06;
+      max-width:680px;
+      color:#f8fbff;
+    }
+
+    .registo-subtitle{
+      margin-top:10px;
+      color:#8b9caf;
+      font-size:14px;
+      line-height:1.55;
+      max-width:760px;
+    }
+
+    .registo-badge{
+      min-width:220px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      text-align:right;
+      box-shadow:none;
+    }
+
+    .registo-badge strong{
+      display:block;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#8b9caf;
+      margin-bottom:8px;
+    }
+
+    .registo-badge span{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#ffffff;
+    }
+
+    .registo-flow{
+      display:grid;
+      grid-template-columns:repeat(6, minmax(0,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+
+    .registo-flow-item{
+      position:relative;
+      padding:18px;
+      border-radius:18px;
+      background:linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 24px rgba(0,0,0,.16);
+    }
+
+    .registo-flow-item strong{
+      display:block;
+      font-size:12px;
+      color:#8b9caf;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      margin-bottom:8px;
+    }
+
+    .registo-flow-item .flow-value{
+      font-size:24px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      margin-bottom:8px;
+    }
+
+    .registo-flow-item .flow-note{
+      font-size:13px;
+      color:#8b9caf;
+      line-height:1.45;
+    }
+
+    .registo-flow-item.primary{
+      background:
+        radial-gradient(circle at top left, rgba(49,208,198,.10), transparent 45%),
+        linear-gradient(160deg,#101b28,#152432);
+      border-color:rgba(49,208,198,.14);
+    }
+
+    .registo-flow-item.success{
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,.08), transparent 42%),
+        linear-gradient(160deg,#101b28,#152432);
+      border-color:rgba(34,197,94,.12);
+    }
+
+    .registo-flow-item.warn{
+      background:
+        radial-gradient(circle at top left, rgba(245,158,11,.08), transparent 42%),
+        linear-gradient(160deg,#101b28,#152432);
+      border-color:rgba(245,158,11,.12);
+    }
+
+    .registo-flow-item.danger{
+      background:
+        radial-gradient(circle at top left, rgba(239,68,68,.08), transparent 42%),
+        linear-gradient(160deg,#101b28,#152432);
+      border-color:rgba(239,68,68,.12);
+    }
+
+    .registo-section-tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      color:#aaf6ec;
+      background:rgba(49,208,198,.08);
+      border:1px solid rgba(49,208,198,.14);
+      margin-bottom:12px;
+    }
+
+    .registo-callout{
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      color:#8b9caf;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .registo-callout strong{
+      color:#ffffff;
+    }
+
+    .sobra-card{
+      position:relative;
+      overflow:hidden;
+    }
+
+    .sobra-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(49,208,198,.08), transparent 60%);
+      pointer-events:none;
+    }
+
+    .sobra-card .summary-value{
+      font-size:32px;
+    }
+
+    .ops-grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:22px;
+      margin-top:18px;
+    }
+
+    .savings-layout{
+      display:grid;
+      gap:22px;
+    }
+
+    .savings-hero{
+      padding:24px;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at 80% 10%, rgba(49,208,198,.07), transparent 34%),
+        linear-gradient(160deg,#0c141e,#111c28);
+      box-shadow:0 22px 55px rgba(0,0,0,.24);
+      margin-bottom:22px;
+    }
+
+    .savings-hero-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .savings-kicker{
+      font-size:12px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#9cefe4;
+      margin-bottom:8px;
+    }
+
+    .savings-title{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1.05;
+      color:#f8fbff;
+      max-width:620px;
+    }
+
+    .savings-subtitle{
+      margin-top:10px;
+      color:#8b9caf;
+      font-size:14px;
+      line-height:1.55;
+      max-width:720px;
+    }
+
+    .savings-badge{
+      min-width:220px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      text-align:right;
+    }
+
+    .savings-badge strong{
+      display:block;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#8b9caf;
+      margin-bottom:8px;
+    }
+
+    .savings-badge span{
+      display:block;
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#ffffff;
+    }
+
+    .savings-summary-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .savings-stat-card{
+      padding:18px;
+      border-radius:20px;
+      background:linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 24px rgba(0,0,0,.16);
+    }
+
+    .savings-stat-card strong{
+      display:block;
+      font-size:11px;
+      color:#8b9caf;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:10px;
+    }
+
+    .savings-stat-value{
+      font-size:28px;
+      font-weight:900;
+      color:#ffffff;
+      letter-spacing:-.04em;
+      margin-bottom:8px;
+    }
+
+    .savings-stat-sub{
+      font-size:13px;
+      color:#8b9caf;
+      line-height:1.45;
+    }
+
+    .savings-goals-panel{
+      padding:22px;
+      border-radius:24px;
+      background:linear-gradient(145deg, rgba(15,23,36,.96), rgba(19,29,43,.98));
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 20px 46px rgba(0,0,0,.22);
+    }
+
+    .savings-goals-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .savings-goals-head h2{
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#ffffff;
+    }
+
+    .savings-goals-head p{
+      margin-top:4px;
+      font-size:13px;
+      color:#8b9caf;
+    }
+
+    .savings-goal-card{
+      padding:18px;
+      border-radius:20px;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.02), transparent 40%),
+        linear-gradient(160deg,#0f1824,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 22px rgba(0,0,0,.14);
+    }
+
+    .savings-goal-card + .savings-goal-card{
+      margin-top:14px;
+    }
+
+    .savings-goal-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .savings-goal-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .savings-goal-icon{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      background:rgba(49,208,198,.08);
+      border:1px solid rgba(49,208,198,.14);
+      flex-shrink:0;
+    }
+
+    .savings-goal-text{
+      min-width:0;
+    }
+
+    .savings-goal-name{
+      font-size:16px;
+      font-weight:800;
+      color:#ffffff;
+      line-height:1.1;
+    }
+
+    .savings-goal-helper{
+      margin-top:4px;
+      font-size:12px;
+      color:#8b9caf;
+    }
+
+    .savings-goal-values{
+      text-align:right;
+      min-width:140px;
+    }
+
+    .savings-goal-current{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      color:#ffffff;
+      line-height:1;
+    }
+
+    .savings-goal-target{
+      margin-top:6px;
+      font-size:12px;
+      color:#8b9caf;
+      font-weight:700;
+    }
+
+    .savings-goal-progress{
+      height:12px;
+      width:100%;
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:12px;
+    }
+
+    .savings-goal-fill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg, #1fb8b2, #31d0c6);
+      transition:.3s ease;
+    }
+
+    .savings-goal-foot{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .savings-goal-percent{
+      font-size:13px;
+      font-weight:800;
+      color:#9EEBB8;
+    }
+
+    .savings-goal-remaining{
+      font-size:13px;
+      font-weight:700;
+      color:#8b9caf;
+    }
+
+    .savings-side-panel{
+      padding:22px;
+      border-radius:24px;
+      background:linear-gradient(145deg, rgba(15,23,36,.96), rgba(19,29,43,.98));
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 20px 46px rgba(0,0,0,.22);
+      height:100%;
+    }
+
+    .savings-side-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .savings-side-top h2{
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#ffffff;
+    }
+
+    .savings-side-top p{
+      margin-top:4px;
+      font-size:13px;
+      color:#8b9caf;
+    }
+
+    .savings-chart-wrap{
+      padding:16px;
+      border-radius:20px;
+      background:linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      margin-bottom:18px;
+    }
+
+    .movimentos-layout{
+      display:grid;
+      gap:22px;
+    }
+
+    .movimentos-hero{
+      padding:24px;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at 82% 8%, rgba(49,208,198,.08), transparent 34%),
+        radial-gradient(circle at 12% 90%, rgba(14,165,233,.06), transparent 36%),
+        linear-gradient(160deg,#0c141e,#111c28);
+      box-shadow:0 22px 55px rgba(0,0,0,.24);
+    }
+
+    .movimentos-hero-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .movimentos-kicker{
+      font-size:12px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#9cefe4;
+      margin-bottom:8px;
+    }
+
+    .movimentos-title{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1.05;
+      color:#f8fbff;
+      max-width:680px;
+    }
+
+    .movimentos-subtitle{
+      margin-top:10px;
+      color:#8b9caf;
+      font-size:14px;
+      line-height:1.55;
+      max-width:760px;
+    }
+
+    .movimentos-badge{
+      min-width:230px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      text-align:right;
+    }
+
+    .movimentos-badge strong{
+      display:block;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#8b9caf;
+      margin-bottom:8px;
+    }
+
+    .movimentos-badge span{
+      display:block;
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#ffffff;
+    }
+
+    .movimentos-filter-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .movimentos-filter-card{
+      padding:16px;
+      border-radius:18px;
+      background:linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 24px rgba(0,0,0,.16);
+    }
+
+    .movimentos-filter-card .input-group{
+      gap:10px;
+    }
+
+    .movimentos-filter-card label{
+      color:#b7c6d6;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      font-weight:800;
+    }
+
+    .movimentos-filter-card select{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.07);
+    }
+
+    .movimentos-analytics-grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:22px;
+    }
+
+    .analysis-highlight{
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top right, rgba(49,208,198,.10), transparent 36%),
+        linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(49,208,198,.16);
+      box-shadow:0 14px 28px rgba(0,0,0,.18);
+    }
+
+    .analysis-highlight::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,.02), transparent 60%);
+      pointer-events:none;
+    }
+
+    .analysis-highlight .summary-value{
+      color:#ffffff;
+      font-size:30px;
+    }
+
+    .analysis-soft{
+      background:linear-gradient(160deg,#101926,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 12px 24px rgba(0,0,0,.16);
+    }
+
+    .movimentos-table-panel{
+      padding:0;
+      overflow:hidden;
+    }
+
+    .movimentos-table-head{
+      padding:22px 22px 14px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0));
+    }
+
+    .movimentos-table-wrap{
+      margin:0 22px 22px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      background:rgba(255,255,255,.015);
+    }
+
+    .movimentos-table-wrap table{
+      min-width:980px;
+    }
+
+    .movimentos-table-wrap th{
+      background:rgba(255,255,255,.028);
+    }
+
+    .movimentos-chart-panel{
+      background:
+        radial-gradient(circle at top right, rgba(14,165,233,.08), transparent 32%),
+        linear-gradient(145deg, rgba(15,23,36,.96), rgba(19,29,43,.98));
+    }
+
+    /* =========================
+       PREVISÕES PREMIUM
+    ========================= */
+
+    .forecast-layout{
+      display:grid;
+      gap:22px;
+    }
+
+    .forecast-hero{
+      padding:24px;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at 82% 8%, rgba(49,208,198,.08), transparent 34%),
+        radial-gradient(circle at 10% 92%, rgba(14,165,233,.06), transparent 36%),
+        linear-gradient(160deg,#0c141e,#111c28);
+      box-shadow:0 22px 55px rgba(0,0,0,.24);
+    }
+
+    .forecast-hero-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .forecast-kicker{
+      font-size:12px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#9cefe4;
+      margin-bottom:8px;
+    }
+
+    .forecast-title{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1.05;
+      color:#f8fbff;
+      max-width:700px;
+    }
+
+    .forecast-subtitle{
+      margin-top:10px;
+      color:#8b9caf;
+      font-size:14px;
+      line-height:1.55;
+      max-width:760px;
+    }
+
+    .forecast-badge{
+      min-width:230px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      text-align:right;
+    }
+
+    .forecast-badge strong{
+      display:block;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#8b9caf;
+      margin-bottom:8px;
+    }
+
+    .forecast-badge span{
+      display:block;
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#ffffff;
+    }
+
+    .forecast-hero-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .forecast-hero-card{
+      padding:18px;
+      border-radius:20px;
+      background:linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 24px rgba(0,0,0,.16);
+    }
+
+    .forecast-hero-card strong{
+      display:block;
+      font-size:11px;
+      color:#8b9caf;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:10px;
+    }
+
+    .forecast-hero-value{
+      font-size:28px;
+      font-weight:900;
+      color:#ffffff;
+      letter-spacing:-.04em;
+      margin-bottom:8px;
+    }
+
+    .forecast-hero-sub{
+      font-size:13px;
+      color:#8b9caf;
+      line-height:1.45;
+    }
+
+    .forecast-analytics-grid{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:22px;
+    }
+
+    .forecast-highlight{
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top right, rgba(49,208,198,.10), transparent 36%),
+        linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(49,208,198,.16);
+      box-shadow:0 14px 28px rgba(0,0,0,.18);
+    }
+
+    .forecast-highlight::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,.02), transparent 60%);
+      pointer-events:none;
+    }
+
+    .forecast-highlight .forecast-value{
+      font-size:32px;
+      color:#ffffff;
+    }
+
+    .forecast-soft{
+      background:linear-gradient(160deg,#101926,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 12px 24px rgba(0,0,0,.16);
+    }
+
+    .forecast-chart-panel{
+      background:
+        radial-gradient(circle at top right, rgba(14,165,233,.08), transparent 32%),
+        linear-gradient(145deg, rgba(15,23,36,.96), rgba(19,29,43,.98));
+    }
+
+    /* =========================
+       LAZER PREMIUM
+    ========================= */
+
+    .lazer-layout{
+      display:grid;
+      gap:22px;
+    }
+
+    .lazer-hero{
+      padding:24px;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at 82% 8%, rgba(49,208,198,.08), transparent 34%),
+        radial-gradient(circle at 14% 92%, rgba(14,165,233,.06), transparent 36%),
+        linear-gradient(160deg,#0c141e,#111c28);
+      box-shadow:0 22px 55px rgba(0,0,0,.24);
+    }
+
+    .lazer-hero-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .lazer-kicker{
+      font-size:12px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#9cefe4;
+      margin-bottom:8px;
+    }
+
+    .lazer-title{
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      line-height:1.05;
+      color:#f8fbff;
+      max-width:700px;
+    }
+
+    .lazer-subtitle{
+      margin-top:10px;
+      color:#8b9caf;
+      font-size:14px;
+      line-height:1.55;
+      max-width:760px;
+    }
+
+    .lazer-badge{
+      min-width:230px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      text-align:right;
+    }
+
+    .lazer-badge strong{
+      display:block;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#8b9caf;
+      margin-bottom:8px;
+    }
+
+    .lazer-badge span{
+      display:block;
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:-.03em;
+      color:#ffffff;
+    }
+
+    .lazer-summary-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .lazer-stat-card{
+      padding:18px;
+      border-radius:20px;
+      background:linear-gradient(160deg,#101a27,#14202d);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 24px rgba(0,0,0,.16);
+    }
+
+    .lazer-stat-card strong{
+      display:block;
+      font-size:11px;
+      color:#8b9caf;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:10px;
+    }
+
+    .lazer-stat-value{
+      font-size:28px;
+      font-weight:900;
+      color:#ffffff;
+      letter-spacing:-.04em;
+      margin-bottom:8px;
+    }
+
+    .lazer-stat-sub{
+      font-size:13px;
+      color:#8b9caf;
+      line-height:1.45;
+    }
+
+    .lazer-table-panel{
+      padding:0;
+      overflow:hidden;
+    }
+
+    .lazer-table-head{
+      padding:22px 22px 14px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0));
+    }
+
+    .lazer-table-wrap{
+      margin:0 22px 22px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      background:rgba(255,255,255,.015);
+    }
+
+    .lazer-table-wrap table{
+      min-width:980px;
+    }
+
+    .lazer-table-wrap th{
+      background:rgba(255,255,255,.028);
+    }
+
+    .lazer-form-panel{
+      background:
+        radial-gradient(circle at top right, rgba(14,165,233,.08), transparent 32%),
+        linear-gradient(145deg, rgba(15,23,36,.96), rgba(19,29,43,.98));
+    }
+
+    @media (max-width:1280px){
+      .four-grid,
+      .five-grid,
+      .section-grid,
+      .forecast-box,
+      .planning-grid,
+      .three-grid,
+      .hero-grid,
+      .registo-flow,
+      .ops-grid,
+      .savings-summary-grid,
+      .movimentos-filter-grid,
+      .movimentos-analytics-grid,
+      .forecast-hero-grid,
+      .forecast-analytics-grid,
+      .lazer-summary-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:980px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{
+        position:relative;
+        height:auto;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+      }
+
+      .nav{
+        display:grid;
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .topbar-right{
+        justify-content:flex-start;
+      }
+    }
+
+    @media (max-width:720px){
+      .content{
+        padding:16px;
+      }
+
+      .four-grid,
+      .five-grid,
+      .form-grid,
+      .nav,
+      .hero-calendar-row{
+        grid-template-columns:1fr;
+      }
+
+      .forecast-value,
+      .planning-value,
+      .summary-value,
+      .daily-history-value,
+      .month-info-value{
+        font-size:22px;
+      }
+
+      .month-label{
+        min-width:auto;
+      }
+
+      .hero-title{
+        font-size:28px;
+      }
+
+      .hero-big-value{
+        font-size:34px;
+      }
+
+      .registo-title,
+      .savings-title,
+      .movimentos-title,
+      .forecast-title,
+      .lazer-title{
+        font-size:24px;
+      }
+
+      .registo-badge,
+      .savings-badge,
+      .movimentos-badge,
+      .forecast-badge,
+      .lazer-badge{
+        min-width:100%;
+        text-align:left;
+      }
+
+      .sobra-card .summary-value{
+        font-size:26px;
+      }
+
+      .savings-goal-top{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .savings-goal-values{
+        text-align:left;
+        min-width:unset;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">L</div>
+        <div class="brand-text">
+          <h1>LairaBudget</h1>
+          <p>Finance dashboard</p>
+        </div>
+      </div>
+
+      <div class="menu-label">Navegação</div>
+      <nav class="nav">
+        <button class="nav-btn active" data-view="overviewView">
+          <span class="nav-icon">✦</span>
+          <span>Visão Geral</span>
+        </button>
+
+        <button class="nav-btn" data-view="registoView">
+          <span class="nav-icon">✎</span>
+          <span>Registo do mês</span>
+        </button>
+
+        <button class="nav-btn" data-view="cofresView">
+          <span class="nav-icon">◎</span>
+          <span>Cofres</span>
+        </button>
+
+        <button class="nav-btn" data-view="movimentosView">
+          <span class="nav-icon">↳</span>
+          <span>Movimentos</span>
+        </button>
+
+        <button class="nav-btn" data-view="previsoesView">
+          <span class="nav-icon">△</span>
+          <span>Previsões</span>
+        </button>
+
+        <button class="nav-btn" data-view="lazerView">
+          <span class="nav-icon">✈</span>
+          <span>Lazer / Viagens</span>
+        </button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h2 id="topbarTitle">Visão Geral</h2>
+          <p id="topbarSubtitle">Resumo visual premium do teu orçamento</p>
+        </div>
+
+        <div class="topbar-right">
+          <div class="month-switcher">
+            <button class="month-btn" id="prevMonthBtn">◀</button>
+            <div class="month-label" id="activeMonthLabel">-</div>
+            <button class="month-btn" id="nextMonthBtn">▶</button>
+          </div>
+          <div class="today-badge" id="todayBadge">Hoje</div>
+        </div>
+      </div>
+
+      <section class="view active" id="overviewView">
+        <section class="hero-grid">
+          <div class="hero-main">
+            <div class="hero-content">
+              <div class="hero-top">
+                <div>
+                  <div class="hero-kicker">Visão geral</div>
+                  <div class="hero-title">O teu dinheiro este mês</div>
+                  <div class="hero-sub">Acompanha gastos e poupança em tempo real</div>
+                </div>
+
+                <div class="hero-balance-tag">
+                  <strong>Saldo total do mês</strong>
+                  <span id="overviewMonthBalance">€0,00</span>
+                </div>
+              </div>
+
+              <div class="hero-big-card">
+                <div class="hero-big-label">Total acumulado</div>
+                <div class="hero-big-value" id="overviewTotalSaved">€0,00</div>
+
+                <div class="hero-mini-stats">
+                  <div class="hero-mini-stat">
+                    <strong>📅 Mês concluído</strong>
+                    <span id="overviewMonthProgress">0%</span>
+                  </div>
+
+                  <div class="hero-mini-stat">
+                    <strong>◎ Meta global</strong>
+                    <span id="overviewGoalProgress">0%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hero-calendar-row">
+                <div class="hero-calendar-card">
+                  <div class="hero-calendar-top">
+                    <div>
+                      <strong id="overviewCurrentMonthName">Mês atual</strong>
+                      <span>mês em foco</span>
+                    </div>
+                    <div class="hero-calendar-badge" id="overviewCurrentMonthBadge">15</div>
+                  </div>
+                  <div class="hero-days" id="overviewCurrentMonthDays"></div>
+                </div>
+
+                <div class="hero-calendar-card dim">
+                  <div class="hero-calendar-top">
+                    <div>
+                      <strong id="overviewNextMonthName">Próximo mês</strong>
+                      <span>o que vem a seguir</span>
+                    </div>
+                    <div class="hero-calendar-badge" id="overviewNextMonthBadge">01</div>
+                  </div>
+                  <div class="hero-days" id="overviewNextMonthDays"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-side">
+            <div class="hero-side-card">
+              <h3>Gastos do mês</h3>
+              <div class="main-number" id="overviewMonthSpent">€0,00</div>
+              <div class="helper">Tudo o que já saiu neste mês selecionado.</div>
+              <div class="hero-month-bar">
+                <div class="hero-month-fill" id="overviewSpentBar"></div>
+              </div>
+            </div>
+
+            <div class="hero-side-card">
+              <h3>Disponível para gastar</h3>
+              <div class="main-number" id="overviewAvailableToSpend">€0,00</div>
+              <div class="helper">Quanto ainda tens de margem livre no mês atual.</div>
+            </div>
+
+            <div class="hero-side-card">
+              <h3>Resumo rápido</h3>
+              <div class="hero-stat-stack">
+                <div class="hero-stat-line">
+                  <span>Guardado este mês</span>
+                  <strong id="overviewSavedThisMonth">€0,00</strong>
+                </div>
+
+                <div class="hero-stat-line">
+                  <span>Saldo alimentação</span>
+                  <strong id="overviewMealBalance">€0,00</strong>
+                </div>
+
+                <div class="hero-stat-line">
+                  <span>Próximo salário</span>
+                  <strong id="overviewDaysToSalary">0 dias</strong>
+                </div>
+
+                <div class="hero-stat-line">
+                  <span>Posso gastar por dia</span>
+                  <strong id="overviewDailyLimit">€0,00</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="four-grid">
+          <div class="summary-item">
+            <strong>Saldo disponível</strong>
+            <div class="summary-value" id="overviewCardSaldo">€0,00</div>
+            <div class="summary-sub">Dinheiro livre restante neste mês.</div>
+          </div>
+
+          <div class="summary-item">
+            <strong>Total guardado</strong>
+            <div class="summary-value" id="overviewCardTotalSaved">€0,00</div>
+            <div class="summary-sub">Acumulado de todos os meses.</div>
+          </div>
+
+          <div class="summary-item">
+            <strong>Guardado este mês</strong>
+            <div class="summary-value" id="overviewCardSavedMonth">€0,00</div>
+            <div class="summary-sub">Valor reservado no mês atual.</div>
+          </div>
+
+          <div class="summary-item">
+            <strong>Saldo alimentação</strong>
+            <div class="summary-value" id="overviewCardMeal">€0,00</div>
+            <div class="summary-sub">Restante no cartão refeição.</div>
+          </div>
+        </section>
+
+        <section class="section-grid">
+          <div class="panel">
+            <div class="panel-title">
+              <div>
+                <h2>Visão financeira do mês</h2>
+                <p>Distribuição dos teus gastos por categoria no mês atual.</p>
+              </div>
+            </div>
+            <div class="chart-box">
+              <canvas id="overviewCategoryChart"></canvas>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <div>
+                <h2>Evolução mensal</h2>
+                <p>Compara os meses fechados e vê quando gastaste mais ou guardaste melhor.</p>
+              </div>
+            </div>
+            <div class="chart-box">
+              <canvas id="overviewMonthlyEvolutionChart"></canvas>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="registoView">
+        <section class="registo-hero">
+          <div class="registo-hero-top">
+            <div>
+              <div class="registo-kicker">Planeamento do mês</div>
+              <div class="registo-title">Planeamento financeiro do mês</div>
+              <div class="registo-subtitle">
+                Define rendimentos, despesas e quanto queres guardar.
+              </div>
+            </div>
+
+            <div class="registo-badge">
+              <strong>Sobra planeada do mês</strong>
+              <span id="previewMonthLeft">€0,00</span>
+            </div>
+          </div>
+
+          <div class="registo-flow">
+            <div class="registo-flow-item primary">
+              <strong>1. Ordenado</strong>
+              <div class="flow-value" id="previewSalary">€0,00</div>
+              <div class="flow-note">Entrada principal que sustenta todo o teu planeamento mensal.</div>
+            </div>
+
+            <div class="registo-flow-item">
+              <strong>2. Fixos</strong>
+              <div class="flow-value" id="previewFixedExpenses">€0,00</div>
+              <div class="flow-note">Renda e contas obrigatórias do mês.</div>
+            </div>
+
+            <div class="registo-flow-item">
+              <strong>3. Extras</strong>
+              <div class="flow-value" id="previewExtraExpenses">€0,00</div>
+              <div class="flow-note">Compras, farmácia, lazer, curso e outras despesas previstas.</div>
+            </div>
+
+            <div class="registo-flow-item">
+              <strong>4. Dinheiro livre</strong>
+              <div class="flow-value" id="previewFreeMoney">€0,00</div>
+              <div class="flow-note">Valor que deixas disponível para o teu dia a dia.</div>
+            </div>
+
+            <div class="registo-flow-item">
+              <strong>5. Cofres</strong>
+              <div class="flow-value" id="previewTotalCofres">€0,00</div>
+              <div class="flow-note">Reserva dos teus objetivos e valores intocáveis.</div>
+            </div>
+
+            <div class="registo-flow-item success sobra-card" id="planningAvailableCard">
+              <strong>6. Sobra real</strong>
+              <div class="flow-value" id="planningAvailable">€0,00</div>
+              <div class="flow-note">Margem final depois de tudo o que planeaste para o mês.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-grid">
+          <div class="panel">
+            <div class="registo-section-tag">Entrada principal</div>
+            <div class="panel-title">
+              <div>
+                <h2>Configuração base</h2>
+                <p>Define o valor que entra, a alimentação e quanto queres manter livre na conta.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="monthSalary">Ordenado (€)</label>
+                <input type="number" id="monthSalary" step="0.01" placeholder="Ex: 1200" />
+              </div>
+
+              <div class="input-group">
+                <label for="monthMealCard">Cartão refeição (€)</label>
+                <input type="number" id="monthMealCard" step="0.01" placeholder="Ex: 180" />
+              </div>
+
+              <div class="input-group">
+                <label for="monthFreeMoney">Dinheiro livre (€)</label>
+                <input type="number" id="monthFreeMoney" step="0.01" placeholder="Ex: 250" />
+              </div>
+            </div>
+
+            <div class="registo-callout">
+              <strong>Dinheiro livre</strong> é o valor que fica solto para o teu mês, sem precisares mexer nos cofres.
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-primary" id="saveMonthBtn">Salvar mês</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="registo-section-tag">Despesas obrigatórias</div>
+            <div class="panel-title">
+              <div>
+                <h2>Contas fixas do mês</h2>
+                <p>Regista tudo o que é recorrente e essencial antes de distribuir o resto.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="monthRent">Renda fixa (€)</label>
+                <input type="number" id="monthRent" step="0.01" placeholder="Ex: 550" />
+              </div>
+
+              <div class="input-group">
+                <label for="billLight">Conta de luz (€)</label>
+                <input type="number" id="billLight" step="0.01" placeholder="Ex: 35" />
+              </div>
+
+              <div class="input-group">
+                <label for="billWater">Conta de água (€)</label>
+                <input type="number" id="billWater" step="0.01" placeholder="Ex: 20" />
+              </div>
+
+              <div class="input-group">
+                <label for="billInternet">Internet (€)</label>
+                <input type="number" id="billInternet" step="0.01" placeholder="Ex: 32" />
+              </div>
+
+              <div class="input-group">
+                <label for="billFuel">Abastecimento (€)</label>
+                <input type="number" id="billFuel" step="0.01" placeholder="Ex: 120" />
+              </div>
+
+              <div class="input-group">
+                <label for="billGym">Ginásio (€)</label>
+                <input type="number" id="billGym" step="0.01" placeholder="Ex: 30" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-grid">
+          <div class="panel">
+            <div class="registo-section-tag">Despesas variáveis previstas</div>
+            <div class="panel-title">
+              <div>
+                <h2>Gastos extra planeados</h2>
+                <p>Reserva aqui despesas que não são fixas, mas que já sabes que podem acontecer no mês.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="extraShopping">Compras (€)</label>
+                <input type="number" id="extraShopping" step="0.01" placeholder="Ex: 80" />
+              </div>
+
+              <div class="input-group">
+                <label for="extraPharmacy">Farmácia (€)</label>
+                <input type="number" id="extraPharmacy" step="0.01" placeholder="Ex: 20" />
+              </div>
+
+              <div class="input-group">
+                <label for="extraLeisure">Lazer (€)</label>
+                <input type="number" id="extraLeisure" step="0.01" placeholder="Ex: 40" />
+              </div>
+
+              <div class="input-group">
+                <label for="extraCourse">Curso / prestação (€)</label>
+                <input type="number" id="extraCourse" step="0.01" placeholder="Ex: 60" />
+              </div>
+
+              <div class="input-group">
+                <label for="extraOther">Outros (€)</label>
+                <input type="number" id="extraOther" step="0.01" placeholder="Ex: 50" />
+              </div>
+            </div>
+
+            <div class="registo-callout">
+              <strong>Gastos extra planeados</strong> ajudam-te a prever melhor o mês real antes mesmo dos movimentos acontecerem.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="registo-section-tag">Resumo dos extras</div>
+            <div class="panel-title">
+              <div>
+                <h2>Prévia dos gastos extra</h2>
+                <p>Estes valores entram no cálculo da tua sobra real do mês.</p>
+              </div>
+            </div>
+
+            <div class="five-grid">
+              <div class="planning-item">
+                <strong>Compras</strong>
+                <div class="planning-value" id="previewShopping">€0,00</div>
+                <div class="planning-sub">Compras previstas no mês.</div>
+              </div>
+
+              <div class="planning-item">
+                <strong>Farmácia</strong>
+                <div class="planning-value" id="previewPharmacy">€0,00</div>
+                <div class="planning-sub">Despesas previstas com farmácia.</div>
+              </div>
+
+              <div class="planning-item">
+                <strong>Lazer</strong>
+                <div class="planning-value" id="previewLeisure">€0,00</div>
+                <div class="planning-sub">Saídas, bar, cinema e momentos de lazer.</div>
+              </div>
+
+              <div class="planning-item">
+                <strong>Curso</strong>
+                <div class="planning-value" id="previewCourse">€0,00</div>
+                <div class="planning-sub">Pagamento extra com curso ou formação.</div>
+              </div>
+
+              <div class="planning-item">
+                <strong>Outros</strong>
+                <div class="planning-value" id="previewOther">€0,00</div>
+                <div class="planning-sub">Tudo o que não entrou nas outras previsões.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-grid">
+          <div class="panel">
+            <div class="registo-section-tag">Objetivos intocáveis</div>
+            <div class="panel-title">
+              <div>
+                <h2>Cofres do mês</h2>
+                <p>Distribui o valor que queres reservar para cada objetivo.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="cofreBrasil">Cofre Brasil (€)</label>
+                <input type="number" id="cofreBrasil" step="0.01" placeholder="Ex: 100" />
+              </div>
+
+              <div class="input-group">
+                <label for="cofreEmergencia">Cofre Emergência (€)</label>
+                <input type="number" id="cofreEmergencia" step="0.01" placeholder="Ex: 80" />
+              </div>
+
+              <div class="input-group">
+                <label for="cofreLazer">Cofre Lazer (€)</label>
+                <input type="number" id="cofreLazer" step="0.01" placeholder="Ex: 60" />
+              </div>
+
+              <div class="input-group">
+                <label for="cofrePoupanca">Cofre Poupança (€)</label>
+                <input type="number" id="cofrePoupanca" step="0.01" placeholder="Ex: 120" />
+              </div>
+
+              <div class="input-group">
+                <label for="cofrePoupancaLara">Cofre Poupança Lara (€)</label>
+                <input type="number" id="cofrePoupancaLara" step="0.01" placeholder="Ex: 90" />
+              </div>
+            </div>
+
+            <div class="registo-callout">
+              Os cofres funcionam como reserva protegida. Idealmente, este valor não entra no teu gasto diário.
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-primary" id="saveCofresBtn">Salvar cofres</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="registo-section-tag">Destino final</div>
+            <div class="panel-title">
+              <div>
+                <h2>Metas dos cofres</h2>
+                <p>Define o tamanho do objetivo para perceberes quanto ainda falta.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="metaBrasil">Meta Brasil (€)</label>
+                <input type="number" id="metaBrasil" step="0.01" placeholder="Ex: 1000" />
+              </div>
+
+              <div class="input-group">
+                <label for="metaEmergencia">Meta Emergência (€)</label>
+                <input type="number" id="metaEmergencia" step="0.01" placeholder="Ex: 2000" />
+              </div>
+
+              <div class="input-group">
+                <label for="metaLazer">Meta Lazer (€)</label>
+                <input type="number" id="metaLazer" step="0.01" placeholder="Ex: 500" />
+              </div>
+
+              <div class="input-group">
+                <label for="metaPoupanca">Meta Poupança (€)</label>
+                <input type="number" id="metaPoupanca" step="0.01" placeholder="Ex: 3000" />
+              </div>
+
+              <div class="input-group">
+                <label for="metaPoupancaLara">Meta Poupança Lara (€)</label>
+                <input type="number" id="metaPoupancaLara" step="0.01" placeholder="Ex: 1500" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="ops-grid">
+          <div class="panel">
+            <div class="registo-section-tag">Resumo automático</div>
+            <div class="panel-title">
+              <div>
+                <h2>Prévia do mês</h2>
+                <p>Vê rapidamente como o teu ordenado está a ser distribuído.</p>
+              </div>
+            </div>
+
+            <div class="planning-grid">
+              <div class="planning-item">
+                <strong>Ordenado</strong>
+                <div class="planning-value" id="planningSalary">€0,00</div>
+                <div class="planning-sub">Entrada base que sustenta o mês.</div>
+              </div>
+
+              <div class="planning-item">
+                <strong>Total fixo</strong>
+                <div class="planning-value" id="planningFixed">€0,00</div>
+                <div class="planning-sub">Renda e despesas obrigatórias.</div>
+              </div>
+
+              <div class="planning-item">
+                <strong>Total extras</strong>
+                <div class="planning-value" id="planningExtras">€0,00</div>
+                <div class="planning-sub">Compras, farmácia, curso, lazer e outras previsões.</div>
+              </div>
+
+              <div class="planning-item">
+                <strong>Total cofres</strong>
+                <div class="planning-value" id="planningCofres">€0,00</div>
+                <div class="planning-sub">Tudo o que estás a proteger em objetivos.</div>
+              </div>
+
+              <div class="planning-item sobra-card" id="planningAvailableCardMirror">
+                <strong>Sobra do mês</strong>
+                <div class="planning-value" id="planningAvailableMirror">€0,00</div>
+                <div class="planning-sub">Margem final depois de fixos, extras, cofres e dinheiro livre.</div>
+              </div>
+            </div>
+
+            <div class="planning-alert safe" id="planningAlert">
+              Preenche os valores do mês para ver o resumo automático.
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="registo-section-tag">Ações do sistema</div>
+            <div class="panel-title">
+              <div>
+                <h2>Operações</h2>
+                <p>Gera, apaga, exporta e importa os movimentos do teu histórico.</p>
+              </div>
+            </div>
+
+            <div class="small-note">
+              Quando geras os movimentos, o sistema cria automaticamente o ordenado, os fixos, os extras e os cofres do mês para irem para a aba de movimentos.
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-primary" id="generateMonthMovementsBtn">Gerar movimentos do mês</button>
+              <button class="btn-danger" id="deleteMonthMovementsBtn">Excluir movimentos do mês</button>
+              <button class="btn-secondary" id="exportHistoryBtn">Exportar histórico</button>
+              <button class="btn-secondary" id="importHistoryBtn">Importar histórico</button>
+              <input type="file" id="importHistoryInput" accept=".json" style="display:none;" />
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="cofresView">
+        <div class="savings-layout">
+          <section class="savings-hero">
+            <div class="savings-hero-top">
+              <div>
+                <div class="savings-kicker">Reserva e objetivos</div>
+                <div class="savings-title">Os teus cofres num só lugar</div>
+                <div class="savings-subtitle">
+                  Acompanha metas, crescimento acumulado e quanto ainda falta para cada objetivo.
+                </div>
+              </div>
+
+              <div class="savings-badge">
+                <strong>Total guardado</strong>
+                <span id="cofresTotalSavedHero">€0,00</span>
+              </div>
+            </div>
+
+            <div class="savings-summary-grid">
+              <div class="savings-stat-card">
+                <strong>Cofres ativos</strong>
+                <div class="savings-stat-value" id="cofresActiveCount">0</div>
+                <div class="savings-stat-sub">Objetivos com valor guardado ou meta definida.</div>
+              </div>
+
+              <div class="savings-stat-card">
+                <strong>Meta total</strong>
+                <div class="savings-stat-value" id="cofresTotalTarget">€0,00</div>
+                <div class="savings-stat-sub">Soma das metas definidas para todos os cofres.</div>
+              </div>
+
+              <div class="savings-stat-card">
+                <strong>Falta atingir</strong>
+                <div class="savings-stat-value" id="cofresTotalRemaining">€0,00</div>
+                <div class="savings-stat-sub">Quanto ainda falta para completares os objetivos.</div>
+              </div>
+
+              <div class="savings-stat-card">
+                <strong>Progresso global</strong>
+                <div class="savings-stat-value" id="cofresGlobalProgress">0%</div>
+                <div class="savings-stat-sub">Visão geral do avanço das tuas reservas.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section-grid">
+            <div class="savings-goals-panel">
+              <div class="savings-goals-head">
+                <div>
+                  <h2>Objetivos de poupança</h2>
+                  <p>Visualiza cada meta de forma mais clara, com foco no valor atual, meta e falta atingir.</p>
+                </div>
+              </div>
+
+              <div class="savings-goal-card">
+                <div class="savings-goal-top">
+                  <div class="savings-goal-left">
+                    <div class="savings-goal-icon">🇧🇷</div>
+                    <div class="savings-goal-text">
+                      <div class="savings-goal-name">Brasil</div>
+                      <div class="savings-goal-helper">Viagem, mudança ou objetivo pessoal.</div>
+                    </div>
+                  </div>
+                  <div class="savings-goal-values">
+                    <div class="savings-goal-current" id="goalBrasilCurrent">€0,00</div>
+                    <div class="savings-goal-target" id="goalBrasilValues">€0,00 / €0,00</div>
+                  </div>
+                </div>
+                <div class="savings-goal-progress">
+                  <div class="savings-goal-fill" id="goalBrasilFill"></div>
+                </div>
+                <div class="savings-goal-foot">
+                  <div class="savings-goal-percent" id="goalBrasilStatus">0%</div>
+                  <div class="savings-goal-remaining" id="goalBrasilRemaining">Faltam €0,00</div>
+                </div>
+              </div>
+
+              <div class="savings-goal-card">
+                <div class="savings-goal-top">
+                  <div class="savings-goal-left">
+                    <div class="savings-goal-icon">🛟</div>
+                    <div class="savings-goal-text">
+                      <div class="savings-goal-name">Emergência</div>
+                      <div class="savings-goal-helper">Reserva de segurança para imprevistos.</div>
+                    </div>
+                  </div>
+                  <div class="savings-goal-values">
+                    <div class="savings-goal-current" id="goalEmergenciaCurrent">€0,00</div>
+                    <div class="savings-goal-target" id="goalEmergenciaValues">€0,00 / €0,00</div>
+                  </div>
+                </div>
+                <div class="savings-goal-progress">
+                  <div class="savings-goal-fill" id="goalEmergenciaFill"></div>
+                </div>
+                <div class="savings-goal-foot">
+                  <div class="savings-goal-percent" id="goalEmergenciaStatus">0%</div>
+                  <div class="savings-goal-remaining" id="goalEmergenciaRemaining">Faltam €0,00</div>
+                </div>
+              </div>
+
+              <div class="savings-goal-card">
+                <div class="savings-goal-top">
+                  <div class="savings-goal-left">
+                    <div class="savings-goal-icon">🎉</div>
+                    <div class="savings-goal-text">
+                      <div class="savings-goal-name">Lazer</div>
+                      <div class="savings-goal-helper">Saídas, viagens e momentos especiais.</div>
+                    </div>
+                  </div>
+                  <div class="savings-goal-values">
+                    <div class="savings-goal-current" id="goalLazerCurrent">€0,00</div>
+                    <div class="savings-goal-target" id="goalLazerValues">€0,00 / €0,00</div>
+                  </div>
+                </div>
+                <div class="savings-goal-progress">
+                  <div class="savings-goal-fill" id="goalLazerFill"></div>
+                </div>
+                <div class="savings-goal-foot">
+                  <div class="savings-goal-percent" id="goalLazerStatus">0%</div>
+                  <div class="savings-goal-remaining" id="goalLazerRemaining">Faltam €0,00</div>
+                </div>
+              </div>
+
+              <div class="savings-goal-card">
+                <div class="savings-goal-top">
+                  <div class="savings-goal-left">
+                    <div class="savings-goal-icon">💚</div>
+                    <div class="savings-goal-text">
+                      <div class="savings-goal-name">Poupança</div>
+                      <div class="savings-goal-helper">Reserva principal de crescimento.</div>
+                    </div>
+                  </div>
+                  <div class="savings-goal-values">
+                    <div class="savings-goal-current" id="goalPoupancaCurrent">€0,00</div>
+                    <div class="savings-goal-target" id="goalPoupancaValues">€0,00 / €0,00</div>
+                  </div>
+                </div>
+                <div class="savings-goal-progress">
+                  <div class="savings-goal-fill" id="goalPoupancaFill"></div>
+                </div>
+                <div class="savings-goal-foot">
+                  <div class="savings-goal-percent" id="goalPoupancaStatus">0%</div>
+                  <div class="savings-goal-remaining" id="goalPoupancaRemaining">Faltam €0,00</div>
+                </div>
+              </div>
+
+              <div class="savings-goal-card">
+                <div class="savings-goal-top">
+                  <div class="savings-goal-left">
+                    <div class="savings-goal-icon">🌸</div>
+                    <div class="savings-goal-text">
+                      <div class="savings-goal-name">Poupança Lara</div>
+                      <div class="savings-goal-helper">Objetivo pessoal dedicado.</div>
+                    </div>
+                  </div>
+                  <div class="savings-goal-values">
+                    <div class="savings-goal-current" id="goalPoupancaLaraCurrent">€0,00</div>
+                    <div class="savings-goal-target" id="goalPoupancaLaraValues">€0,00 / €0,00</div>
+                  </div>
+                </div>
+                <div class="savings-goal-progress">
+                  <div class="savings-goal-fill" id="goalPoupancaLaraFill"></div>
+                </div>
+                <div class="savings-goal-foot">
+                  <div class="savings-goal-percent" id="goalPoupancaLaraStatus">0%</div>
+                  <div class="savings-goal-remaining" id="goalPoupancaLaraRemaining">Faltam €0,00</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="savings-side-panel">
+              <div class="savings-side-top">
+                <div>
+                  <h2>Painel do cofre selecionado</h2>
+                  <p>Troca entre os cofres para veres a evolução no gráfico e no extrato mensal.</p>
+                </div>
+              </div>
+
+              <div class="cofre-tabs">
+                <button class="cofre-tab active" data-cofre="brasil">Brasil</button>
+                <button class="cofre-tab" data-cofre="emergencia">Emergência</button>
+                <button class="cofre-tab" data-cofre="lazer">Lazer</button>
+                <button class="cofre-tab" data-cofre="poupanca">Poupança</button>
+                <button class="cofre-tab" data-cofre="poupanca_lara">Poupança Lara</button>
+              </div>
+
+              <div class="summary-item" style="margin-bottom:18px;">
+                <strong>Leitura rápida</strong>
+                <div class="summary-value" id="cofresGlobalProgressMirror">Acompanhar evolução</div>
+                <div class="summary-sub">
+                  Usa as tabs acima para mudar o foco do gráfico e perceber como cada objetivo está a crescer ao longo dos meses.
+                </div>
+              </div>
+
+              <div class="savings-chart-wrap">
+                <div class="panel-title" style="margin-bottom:14px;">
+                  <div>
+                    <h2 style="font-size:16px;">Evolução do cofre</h2>
+                    <p>Histórico visual do valor guardado por mês.</p>
+                  </div>
+                </div>
+
+                <div class="small-chart-box">
+                  <canvas id="cofreEvolutionChart"></canvas>
+                </div>
+              </div>
+
+              <div class="panel-title" style="margin-top:18px;">
+                <div>
+                  <h2 style="font-size:16px;">Extrato mensal</h2>
+                  <p>Consulta os meses registados e o valor guardado em cada período.</p>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Mês</th>
+                      <th>Cofre</th>
+                      <th>Valor guardado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cofreHistoryTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="movimentosView">
+        <div class="movimentos-layout">
+          <section class="movimentos-hero">
+            <div class="movimentos-hero-top">
+              <div>
+                <div class="movimentos-kicker">Fluxo financeiro</div>
+                <div class="movimentos-title">Todos os movimentos do mês num painel mais claro</div>
+                <div class="movimentos-subtitle">
+                  Filtra entradas e saídas, destaca categorias importantes e acompanha a leitura do mês com uma apresentação mais premium.
+                </div>
+              </div>
+
+              <div class="movimentos-badge">
+                <strong>Categoria em análise</strong>
+                <span id="analysisSalaryPercent">0%</span>
+              </div>
+            </div>
+
+            <div class="movimentos-filter-grid">
+              <div class="movimentos-filter-card">
+                <div class="input-group">
+                  <label for="filterType">Tipo</label>
+                  <select id="filterType">
+                    <option value="all">Todos</option>
+                    <option value="entrada">Entradas</option>
+                    <option value="saida">Saídas</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="movimentos-filter-card">
+                <div class="input-group">
+                  <label for="filterOrigin">Origem</label>
+                  <select id="filterOrigin">
+                    <option value="all">Todas</option>
+                    <option value="account">Conta</option>
+                    <option value="meal">Alimentação</option>
+                    <option value="save">Cofrinho</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="movimentos-filter-card">
+                <div class="input-group">
+                  <label for="filterCategory">Categoria</label>
+                  <select id="filterCategory">
+                    <option value="all">Todas</option>
+                    <option value="salario">Ordenado</option>
+                    <option value="renda">Renda fixa</option>
+                    <option value="cofrinho">Cofrinho</option>
+                    <option value="conta_luz">Conta de luz</option>
+                    <option value="conta_agua">Conta de água</option>
+                    <option value="internet">Internet</option>
+                    <option value="abastecimento">Abastecimento</option>
+                    <option value="ginasio">Ginásio</option>
+                    <option value="manutencao_carro">Manutenção do carro</option>
+                    <option value="alimentacao">Alimentação</option>
+                    <option value="transporte">Transporte</option>
+                    <option value="seguro_carro">Seguro do carro</option>
+                    <option value="saude">Saúde</option>
+                    <option value="lazer">Lazer</option>
+                    <option value="compras">Compras</option>
+                    <option value="farmacia">Farmácia</option>
+                    <option value="curso">Curso</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="movimentos-filter-card">
+                <div class="input-group">
+                  <label for="analysisCategory">Analisar categoria</label>
+                  <select id="analysisCategory">
+                    <option value="renda">Renda fixa</option>
+                    <option value="conta_luz">Conta de luz</option>
+                    <option value="conta_agua">Conta de água</option>
+                    <option value="internet">Internet</option>
+                    <option value="abastecimento">Abastecimento</option>
+                    <option value="ginasio">Ginásio</option>
+                    <option value="alimentacao">Alimentação</option>
+                    <option value="transporte">Transporte</option>
+                    <option value="seguro_carro">Seguro do carro</option>
+                    <option value="saude">Saúde</option>
+                    <option value="lazer">Lazer</option>
+                    <option value="compras">Compras</option>
+                    <option value="farmacia">Farmácia</option>
+                    <option value="curso">Curso</option>
+                    <option value="manutencao_carro">Manutenção do carro</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="movimentos-analytics-grid">
+            <div class="panel">
+              <div class="panel-title">
+                <div>
+                  <h2>Análise por categoria</h2>
+                  <p>Leitura rápida da categoria escolhida, com mais destaque visual e comparação no tempo.</p>
+                </div>
+              </div>
+
+              <div class="three-grid">
+                <div class="summary-item analysis-highlight">
+                  <strong>Total este mês</strong>
+                  <div class="summary-value" id="analysisMonthTotal">€0,00</div>
+                  <div class="summary-sub">Quanto esta categoria representa no mês atual.</div>
+                </div>
+
+                <div class="summary-item analysis-soft">
+                  <strong>Total no ano</strong>
+                  <div class="summary-value" id="analysisYearTotal">€0,00</div>
+                  <div class="summary-sub">Soma acumulada no ano atual.</div>
+                </div>
+
+                <div class="summary-item analysis-soft">
+                  <strong>% do ordenado</strong>
+                  <div class="summary-value" id="analysisSalaryPercentMirror">0%</div>
+                  <div class="summary-sub">Peso desta categoria no ordenado atual.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel movimentos-chart-panel">
+              <div class="panel-title">
+                <div>
+                  <h2>Evolução da categoria</h2>
+                  <p>Vê como esta despesa se comporta ao longo dos meses do ano.</p>
+                </div>
+              </div>
+
+              <div class="small-chart-box">
+                <canvas id="categoryAnalysisChart"></canvas>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel movimentos-table-panel">
+            <div class="movimentos-table-head">
+              <div class="panel-title" style="margin-bottom:0;">
+                <div>
+                  <h2>Movimentos do mês</h2>
+                  <p>Consulta, filtra e acompanha todos os lançamentos do mês selecionado.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="movimentos-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Tipo</th>
+                    <th>Origem</th>
+                    <th>Categoria</th>
+                    <th>Valor</th>
+                    <th>Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="previsoesView">
+        <div class="forecast-layout">
+          <section class="forecast-hero">
+            <div class="forecast-hero-top">
+              <div>
+                <div class="forecast-kicker">Projeção do mês</div>
+                <div class="forecast-title">Vê com mais clareza como este mês pode terminar</div>
+                <div class="forecast-subtitle">
+                  Acompanha saldo final previsto, ritmo médio de gasto, margem segura e evolução da tua poupança numa apresentação mais premium.
+                </div>
+              </div>
+
+              <div class="forecast-badge">
+                <strong>Saldo final previsto</strong>
+                <span id="forecastFinalBalanceMirror">€0,00</span>
+              </div>
+            </div>
+
+            <div class="forecast-hero-grid">
+              <div class="forecast-hero-card">
+                <strong>Ritmo médio por dia</strong>
+                <div class="forecast-hero-value" id="forecastDailyAverageMirror">€0,00</div>
+                <div class="forecast-hero-sub">Quanto estás a gastar por dia, em média, com base no mês atual.</div>
+              </div>
+
+              <div class="forecast-hero-card">
+                <strong>Ainda podes gastar</strong>
+                <div class="forecast-hero-value" id="forecastSafeToSpendMirror">€0,00</div>
+                <div class="forecast-hero-sub">Margem mais segura para seguires até ao fim do mês sem apertar.</div>
+              </div>
+
+              <div class="forecast-hero-card">
+                <strong>Estado do mês</strong>
+                <div class="forecast-hero-value" id="forecastStatusLabel">A avaliar</div>
+                <div class="forecast-hero-sub">Leitura rápida da saúde financeira do teu mês atual.</div>
+              </div>
+
+              <div class="forecast-hero-card">
+                <strong>Tendência</strong>
+                <div class="forecast-hero-value" id="forecastTrendLabel">Estável</div>
+                <div class="forecast-hero-sub">Leitura visual da tua projeção com base no comportamento atual.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="forecast-analytics-grid">
+            <div class="panel">
+              <div class="panel-title">
+                <div>
+                  <h2>Resumo da previsão</h2>
+                  <p>Os principais números do mês com mais destaque e uma mensagem automática de leitura.</p>
+                </div>
+              </div>
+
+              <div class="forecast-box">
+                <div class="forecast-item forecast-highlight">
+                  <strong>Saldo final previsto</strong>
+                  <div class="forecast-value" id="forecastFinalBalanceMirrorCard">€0,00</div>
+                  <div class="forecast-sub">Projeção de fechamento do mês.</div>
+                </div>
+
+                <div class="forecast-item forecast-soft">
+                  <strong>Ritmo médio por dia</strong>
+                  <div class="forecast-value" id="forecastDailyAverageMirrorCard">€0,00</div>
+                  <div class="forecast-sub">Baseado nos teus gastos da conta.</div>
+                </div>
+
+                <div class="forecast-item forecast-soft">
+                  <strong>Ainda podes gastar</strong>
+                  <div class="forecast-value" id="forecastSafeToSpendMirrorCard">€0,00</div>
+                  <div class="forecast-sub">Margem estimada até ao fim do mês.</div>
+                </div>
+              </div>
+
+              <div class="forecast-status safe" id="forecastStatusMirror">
+                Tudo parece controlado neste mês.
+              </div>
+            </div>
+
+            <div class="panel forecast-chart-panel">
+              <div class="panel-title">
+                <div>
+                  <h2>Evolução da poupança</h2>
+                  <p>Acumulado guardado ao longo dos meses para perceberes a tua consistência.</p>
+                </div>
+              </div>
+              <div class="chart-box">
+                <canvas id="poupancaChart"></canvas>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="lazerView">
+        <div class="lazer-layout">
+          <section class="lazer-hero">
+            <div class="lazer-hero-top">
+              <div>
+                <div class="lazer-kicker">Eventos e viagens</div>
+                <div class="lazer-title">Controla planos, orçamentos e gastos num painel mais bonito</div>
+                <div class="lazer-subtitle">
+                  Acompanha o saldo do cofre lazer, quanto já está comprometido, o próximo evento e todos os gastos dos teus planos num visual mais premium.
+                </div>
+              </div>
+
+              <div class="lazer-badge">
+                <strong>Disponível para lazer</strong>
+                <span id="tripAvailable">€0,00</span>
+              </div>
+            </div>
+
+            <div class="lazer-summary-grid">
+              <div class="lazer-stat-card">
+                <strong>Total no cofre lazer</strong>
+                <div class="lazer-stat-value" id="tripLazerSaved">€0,00</div>
+                <div class="lazer-stat-sub">Total acumulado que já foi reservado para lazer e viagens.</div>
+              </div>
+
+              <div class="lazer-stat-card">
+                <strong>Valor comprometido</strong>
+                <div class="lazer-stat-value" id="tripCommitted">€0,00</div>
+                <div class="lazer-stat-sub" id="tripCommittedSub">Total ainda reservado nos eventos.</div>
+              </div>
+
+              <div class="lazer-stat-card">
+                <strong>Próximo evento</strong>
+                <div class="lazer-stat-value" id="tripNextEvent">Sem dados</div>
+                <div class="lazer-stat-sub" id="tripNextEventSub">Quando houver um próximo evento, aparece aqui.</div>
+              </div>
+
+              <div class="lazer-stat-card">
+                <strong>Total gasto em lazer</strong>
+                <div class="lazer-stat-value" id="tripYearTotal">€0,00</div>
+                <div class="lazer-stat-sub">Soma de todos os gastos dos eventos registados.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="four-grid">
+            <div class="summary-item">
+              <strong>Média por evento</strong>
+              <div class="summary-value" id="tripAverage">€0,00</div>
+              <div class="summary-sub">Gasto médio por evento criado.</div>
+            </div>
+
+            <div class="summary-item">
+              <strong>Evento mais caro</strong>
+              <div class="summary-value" id="tripHighest">€0,00</div>
+              <div class="summary-sub" id="tripHighestName">Sem dados</div>
+            </div>
+
+            <div class="summary-item">
+              <strong>Número de eventos</strong>
+              <div class="summary-value" id="tripCount">0</div>
+              <div class="summary-sub">Viagens, passeios e saídas especiais.</div>
+            </div>
+
+            <div class="summary-item">
+              <strong>Margem do cofre</strong>
+              <div class="summary-value" id="tripAvailableMirror">€0,00</div>
+              <div class="summary-sub" id="tripAvailableSub">Valor ainda livre para gastar em lazer e viagens.</div>
+            </div>
+          </section>
+
+          <section class="section-grid">
+            <div class="panel lazer-form-panel">
+              <div class="panel-title">
+                <div>
+                  <h2>Criar novo evento</h2>
+                  <p>Regista viagens, saídas e passeios com o respetivo orçamento previsto.</p>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="input-group">
+                  <label for="tripName">Nome do evento</label>
+                  <input type="text" id="tripName" placeholder="Ex: Viagem Porto, Passeio Sintra" />
+                  <span class="field-error" id="tripNameError">Escreve o nome do evento.</span>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripType">Tipo</label>
+                  <select id="tripType">
+                    <option value="viagem">Viagem</option>
+                    <option value="passeio">Passeio</option>
+                    <option value="saida">Saída</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripLocation">Destino / Local</label>
+                  <input type="text" id="tripLocation" placeholder="Ex: Porto, Lisboa, Algarve" />
+                  <span class="field-error" id="tripLocationError">Escreve o local do evento.</span>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripBudget">Orçamento previsto (€)</label>
+                  <input type="number" id="tripBudget" step="0.01" placeholder="Ex: 250" />
+                  <span class="field-error" id="tripBudgetError">Preenche um orçamento válido.</span>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripStartDate">Data início</label>
+                  <input type="date" id="tripStartDate" />
+                  <span class="field-error" id="tripStartDateError">Escolhe a data inicial.</span>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripEndDate">Data fim</label>
+                  <input type="date" id="tripEndDate" />
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="btn-primary" id="createTripBtn">Criar evento</button>
+              </div>
+            </div>
+
+            <div class="panel lazer-form-panel">
+              <div class="panel-title">
+                <div>
+                  <h2>Adicionar gasto ao evento</h2>
+                  <p>Escolhe um evento e regista hotel, alimentação, transportes e outros custos.</p>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="input-group">
+                  <label for="tripExpenseEvent">Evento</label>
+                  <select id="tripExpenseEvent"></select>
+                  <span class="field-error" id="tripExpenseEventError">Escolhe um evento.</span>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripExpenseDate">Data</label>
+                  <input type="date" id="tripExpenseDate" />
+                </div>
+
+                <div class="input-group">
+                  <label for="tripExpenseDescription">Descrição</label>
+                  <input type="text" id="tripExpenseDescription" placeholder="Ex: Hotel, almoço, Uber" />
+                  <span class="field-error" id="tripExpenseDescriptionError">Escreve uma descrição.</span>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripExpenseCategory">Categoria</label>
+                  <select id="tripExpenseCategory">
+                    <option value="alojamento">Alojamento</option>
+                    <option value="alimentacao">Alimentação</option>
+                    <option value="transporte">Transporte</option>
+                    <option value="voo">Voo</option>
+                    <option value="combustivel">Combustível</option>
+                    <option value="passeios">Passeios</option>
+                    <option value="compras">Compras</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="tripExpenseValue">Valor (€)</label>
+                  <input type="number" id="tripExpenseValue" step="0.01" placeholder="Ex: 35" />
+                  <span class="field-error" id="tripExpenseValueError">Preenche um valor válido.</span>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="btn-primary" id="addTripExpenseBtn">Adicionar gasto</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="section-grid">
+            <div class="panel lazer-table-panel">
+              <div class="lazer-table-head">
+                <div class="panel-title" style="margin-bottom:0;">
+                  <div>
+                    <h2>Eventos registados</h2>
+                    <p>Consulta cada evento, o orçamento, o total gasto e o estado atual.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="lazer-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Evento</th>
+                      <th>Tipo</th>
+                      <th>Local</th>
+                      <th>Orçamento</th>
+                      <th>Total gasto</th>
+                      <th>Usado</th>
+                      <th>Restante</th>
+                      <th>Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tripEventsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel lazer-table-panel">
+              <div class="lazer-table-head">
+                <div class="panel-title" style="margin-bottom:0;">
+                  <div>
+                    <h2>Extrato do evento</h2>
+                    <p id="selectedTripTitle">Seleciona um evento para ver os gastos</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style="padding:0 22px;">
+                <div class="event-warning-box" id="selectedTripWarning"></div>
+              </div>
+
+              <div class="lazer-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Descrição</th>
+                      <th>Categoria</th>
+                      <th>Valor</th>
+                      <th>Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tripExpensesTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const originalAnalysisSalaryPercentEl = document.getElementById("analysisSalaryPercent");
+    const mirrorAnalysisSalaryPercentEl = document.getElementById("analysisSalaryPercentMirror");
+
+    const observer = new MutationObserver(() => {
+      if (originalAnalysisSalaryPercentEl && mirrorAnalysisSalaryPercentEl) {
+        mirrorAnalysisSalaryPercentEl.textContent = originalAnalysisSalaryPercentEl.textContent;
+      }
+    });
+
+    if (originalAnalysisSalaryPercentEl && mirrorAnalysisSalaryPercentEl) {
+      observer.observe(originalAnalysisSalaryPercentEl, { childList: true, subtree: true, characterData: true });
+      mirrorAnalysisSalaryPercentEl.textContent = originalAnalysisSalaryPercentEl.textContent;
+    }
+  </script>
+
+  <script src="app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+          navigator.serviceWorker.register('/service-worker.js');
+          .then(() => console.log("Service Worker registado"))
+          .catch(err => console.log("Erro no Service Worker:", err));
+      });
+    }
+  </script>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker registado'))
+    .catch(err => console.log('Erro SW:', err));
+}
+</script>
+</body>
+</html>
