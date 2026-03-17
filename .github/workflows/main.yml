@@ -1,0 +1,21 @@
+name: Basic CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check files exist
+        run: |
+          echo "Checking project structure..."
+          test -f index.html
+          test -f app.js
+          test -f style.css
+          echo "All required files are present ✅"
